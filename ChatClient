@@ -1,0 +1,199 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author Eeshan
+ * Basic UI of the application. Enter /HELP for the list of commands.
+ */
+
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+import javax.swing.text.DefaultCaret;
+
+public class ChatClient extends javax.swing.JFrame {
+    private javax.swing.JTextArea _message_area;
+    private javax.swing.JButton _btn_submit;
+    private javax.swing.JTextField _fieldMsg;
+    private javax.swing.JList _jList1;
+    private javax.swing.JScrollPane _jScrollPane2;
+    private javax.swing.JScrollPane _jScrollPane3;
+
+    NetworkManager _net;
+    DefaultListModel<String> _model;
+    
+    public ChatClient() {
+        _net = NetworkManager.getInstance();
+        _net.setServer(readIP(), 80);
+        _net.setInterface(this);
+        _net.submit("NICK " + readName());
+        _model = new DefaultListModel<>();
+        initComponents();
+        setComponentsExtras();
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    _net.hearServer();
+                } catch (Exception e) {
+                }
+            }
+        }).start();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                _net.submit("EXIT");
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+
+    private void initComponents() {
+
+        _fieldMsg = new javax.swing.JTextField();
+        _btn_submit = new javax.swing.JButton();
+        _jScrollPane2 = new javax.swing.JScrollPane();
+        _message_area = new javax.swing.JTextArea();
+        _jScrollPane3 = new javax.swing.JScrollPane();
+        _jList1 = new javax.swing.JList();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        _fieldMsg.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                fieldMsgKeyPressed(evt);
+            }
+        });
+
+        _btn_submit.setText("Submit");
+        _btn_submit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_submit_actionPerformed(evt);
+            }
+        });
+
+        _message_area.setEditable(false);
+        _message_area.setColumns(20);
+        _message_area.setLineWrap(true);
+        _message_area.setRows(5);
+        _message_area.setWrapStyleWord(true);
+        _jScrollPane2.setViewportView(_message_area);
+
+        _jList1.setModel(_model);
+        _jList1.setFixedCellHeight(20);
+        _jScrollPane3.setViewportView(_jList1);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(_fieldMsg)
+                    .addComponent(_jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(_jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
+                    .addComponent(_btn_submit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(_jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                    .addComponent(_jScrollPane3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(_fieldMsg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(_btn_submit))
+                .addContainerGap())
+        );
+        pack();
+    }
+
+    private void btn_submit_actionPerformed(java.awt.event.ActionEvent evt) {
+        _net.submit(_fieldMsg.getText());
+        _fieldMsg.setText("");
+    }
+
+    private void fieldMsgKeyPressed(java.awt.event.KeyEvent evt) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btn_submit_actionPerformed(null);
+        }
+    }
+
+    public static void main(String args[]) {
+     
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(ChatClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(ChatClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(ChatClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(ChatClient.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+
+        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new ChatClient().setVisible(true);
+            }
+        });
+    }
+
+    
+    
+    public void addUser(User u) {
+        _model.addElement(u.getNick());
+    }
+    
+    public void addMessage(String s) {
+        _message_area.append(s + "\n");
+    }
+    
+    public void cleanList() {
+        _model.clear();
+    }
+
+    private void setComponentsExtras() {
+        DefaultCaret caret = (DefaultCaret)_message_area.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        _jList1.setFixedCellHeight(20);
+        setLocationRelativeTo(null);
+        _fieldMsg.requestFocus();
+    }
+
+    private String readIP() {
+        return JOptionPane.showInputDialog(null, "Enter server IP", "54.153.98.168");
+    }
+
+    private String readName() {
+        return JOptionPane.showInputDialog(null, "Enter username", "User");
+    }
+}
